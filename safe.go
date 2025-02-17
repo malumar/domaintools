@@ -8,6 +8,24 @@ import (
 
 const acePrefix = "xn--"
 
+// DomainToLowerASCII quick conversion of domain names written as ASCII or UTF8 IDN to ASCII and returns the name
+// written in lowercase.
+// REMARK! It won't work for names that consist of several parts - check HasIdnMarker and IsIdn
+func DomainToLowerASCII(domainName string) string {
+	if HasIdnMarker(domainName) {
+		if val, err := ToASCII(domainName); err == nil {
+			return strings.ToLower(val)
+		}
+	} else {
+		if val, err := ToASCII(domainName); err == nil {
+			return strings.ToLower(val)
+		}
+
+	}
+
+	return strings.ToLower(domainName)
+}
+
 func ToASCII(s string) (string, error) {
 	if ascii(s) {
 		return s, nil
@@ -78,6 +96,9 @@ func SafeToAscii(s string) string {
 	}
 }
 
+// IsIdn checks if the domain has an IDN tag somewhere, because it can be e.g. only a selected FQDN frame:
+// example.xn--p1ai (example.рф) the tag does not have to appear at the beginning of the string,
+// so you cannot use HasIdnMarker
 func IsIdn(s string) bool {
 	return strings.HasPrefix(s, acePrefix)
 }
